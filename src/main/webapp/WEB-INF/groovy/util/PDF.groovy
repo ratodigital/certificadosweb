@@ -1,5 +1,7 @@
 package util
 
+import groovyx.gaelyk.GaelykBindings
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -13,6 +15,9 @@ import com.itextpdf.text.pdf.AcroFields;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 
+import com.google.appengine.api.files.FileReadChannel
+
+@GaelykBindings
 class PDF {
 	PdfReader pdf;
 	PdfStamper pdfStamper;
@@ -41,16 +46,16 @@ class PDF {
 	}
 
 	def changeFieldValue(field, newValue) {
-    AcroFields form = pdfStamper.getAcroFields()
-    try {
-			form.setField(field, newValue)
-		} catch (Exception e) {
-			e.printStackTrace()
-		}        
-	}
+	    AcroFields form = pdfStamper.getAcroFields()
+	    try {
+				form.setField(field, newValue)
+			} catch (Exception e) {
+				e.printStackTrace()
+			}        
+		}
 
-	def closePdf() {
-    pdf.close();			
+		def closePdf() {
+	    pdf.close();			
 	}
 	
 	def closePdfStamper() {
@@ -59,6 +64,39 @@ class PDF {
 		
 	def closeAll() {
 		pdfStamper.close()
-    pdf.close();			
+    		pdf.close();			
+	}
+
+	static def gerarPDF(pdfFile, data, outputPdfName) {
+		byte[] outputPdfBytes
+		def pdfStamper
+		String messageVars = ""
+		pdfFile.withStream { inputStream -> 
+			def pdf = new PDF()
+			pdf.open(inputStream) 
+			pdfStamper = files.createNewBlobFile("application/pdf")
+			pdfStamper.withOutputStream(locked: true, finalize: true) { outputStream ->
+				pdf.preparePdfStamper(outputStream)
+				pdf.listFormFields().each { fieldName ->
+					pdf.changeFieldValue(fieldName, data[fieldName])
+					messageVars += "$fieldName = \"${data[fieldName]}\";"
+				}
+				pdf.closeAll()
+			}
+		}
+		pdfStamper
+	}
+
+	static def Map getMessageVars(pdfFile, data) {
+		Map messageVars = [:]
+		pdfFile.withStream { inputStream -> 
+			def pdf = new PDF()
+			pdf.open(inputStream)   
+			pdf.listFormFields().each { fieldName ->
+			messageVars[fieldName] = data[fieldName]
+		}
+			pdf.closePdf()	
+		}
+		messageVars
 	}
 }
