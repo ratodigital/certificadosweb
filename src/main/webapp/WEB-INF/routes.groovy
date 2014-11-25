@@ -11,4 +11,6 @@ post "/upload", forward: "/upload.groovy"
 get "/success", forward: "/WEB-INF/pages/success.gtpl"
 get "/failure", forward: "/WEB-INF/pages/failure.gtpl"
 
+get "/log", forward: "/log.groovy"
+get "/download", forward: "/download.groovy"
 

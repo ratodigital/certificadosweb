@@ -59,64 +59,88 @@ if (!params.status) {
       blobstore.serve(pdfStamper.blobKey, response)	   
       break   
     default:
-      def csvFile = new BlobKey(params.csvKey)          
-      def csvData = getCSVData(csvFile)
-			def pdfFile
-      if (csvData.size() <= 101) {
-        pdfFile = new BlobKey(params.pdfKey) 
+      if (params.message.indexOf("\$link") == -1) {
+            flushError = 'Você obrigatoriamente deve usar o campo \$link.'
+      } else {      
+		  def csvFile = new BlobKey(params.csvKey)          
+		  def csvData = getCSVData(csvFile)
+				def pdfFile
+		  if (csvData.size() <= 101) {
+		    pdfFile = new BlobKey(params.pdfKey) 
+		    sucesso = 0
+		    erro = 0
+		    for (data in csvData) {
+		      def outputPdfName = "${data['email']}_${pdfFile.filename}"
+		      def pdfStamper = gerarPDF(pdfFile, data, outputPdfName)
+		      def outputPdfBytes = getBytes(pdfStamper) 
 
-        for (data in csvData) {
-          def outputPdfName = "${data['email']}_${pdfFile.filename}"
-          def pdfStamper = gerarPDF(pdfFile, data, outputPdfName)
-          def outputPdfBytes = getBytes(pdfStamper) 
+		      //println "$params.subject Enviando arquivo '$outputPdfName' para email '${data['email']}'<br/>"	    
+			  def pdfKey = pdfStamper.blobKey.keyString
+			  
+		      def vars = getMessageVars(pdfFile, data)
+			  vars.put "link", "http://localhost:8080/download?key=$pdfKey"
+			  
+		      Entity e = new Entity("log")
 
-          //println "$params.subject Enviando arquivo '$outputPdfName' para email '${data['email']}'<br/>"	    
+			  e.name = params.fromName
+		      e.email = data['email']
+		      e.replyTo = params.replyTo
+		      e.subject = params.subject
+		      e.message = params.message
+		      e.pdfKey = pdfStamper.blobKey.keyString
+		      e.pdfName = outputPdfName
+		      e.status = "OK"
+			  e.dateCreated = new Date()
+		      
+		      try {
+		        def subject = evalScript(vars, params.subject)
+		        def message = evalScript(vars, params.message)
 
-          def vars = getMessageVars(pdfFile, data)
-          
-          try {
-            def subject = evalScript(vars, params.subject)
-            def message = evalScript(vars, params.message)
-
-            //println "MAIL SENT: $FROM_EMAIL $params.fromName ${data['email']} ${data['email']} $subject $message $outputPdfName<br><br>"
-            
-            Mail.send(FROM_EMAIL, params.fromName, 
-                      data['email'], data['email'], 
-                      subject, message, params.replyTo,
-                      outputPdfName, outputPdfBytes)
-                      
-          } catch (groovy.lang.MissingPropertyException e) {
-            def m = e.getMessage()
-            def campo = m.substring(18,m.indexOf(" for"))
-            flushError = 'O campo \$' + campo + ' não existe no Template PDF.'
-          }
-					Entity e = new Entity("log")
-					e.name = params.fromName
-          e.email = params.replyTo
-					e.total = csvData.size()
-          e.save()
-
-					flush = "${csvData.size()} certificados enviados por email com sucesso!"
-          pdfStamper.delete()
-        }
-      } else {
-        status = "ERRO"
-        flushError = "Na versão Beta não é possível enviar mais de 100 certificados."
-      }
- 
+		        e.subject = subject
+		        e.message = message
+		        //println "MAIL SENT: $FROM_EMAIL $params.fromName ${data['email']} ${data['email']} $subject $message $outputPdfName<br><br>"
+		        
+		        Mail.send(FROM_EMAIL, params.fromName, 
+		                  data['email'], data['email'], 
+		                  subject, message, params.replyTo,
+		                  outputPdfName, outputPdfBytes)
+		        sucesso++          
+		      } catch (groovy.lang.MissingPropertyException ex) {
+		        def m = ex.getMessage()
+		        def campo = m.substring(18,m.indexOf(" for"))
+		        flushError = 'O campo \$' + campo + ' não existe no Template PDF.'
+		        erro++
+		      } finally {
+		        e.save()
+		        if (sucesso > 0) {
+	  		      flush = "$sucesso certificados enviados por email com sucesso!"
+		        }
+		        if (erro > 0) {
+		          flush += " $erro certificados apresentaram erro no envio."
+		        }
+		        //pdfStamper.delete()
+		      } 
+		    }
+		  } else {
+		    status = "ERRO"
+		    flushError = "Na versão Beta não é possível enviar mais de 100 certificados."
+		  }
+	  }
+	   
       request.flush = flush
       request.flushError = flushError
       if (flushError == "") {
-        pdfFile.delete()
-        csvFile.delete()			
+        //pdfFile.delete()
+        //csvFile.delete()			
         forward "/WEB-INF/pages/success.gtpl"      
       } else {
         request.status = "GETMSGDATA"
         request.pdfKey = params.pdfKey
         request.pdfName = params.pdfName
-        request.pdfFields = params.pdfFields        
+        request.pdfFields = params.pdfFields
+        request.replyTo = params.replyTo        
         request.fromName = params.fromName
-				request.csvKey = params.csvKey
+		request.csvKey = params.csvKey
         request.subject = params.subject
         request.message = params.message
         forward "/WEB-INF/pages/upload.gtpl"      

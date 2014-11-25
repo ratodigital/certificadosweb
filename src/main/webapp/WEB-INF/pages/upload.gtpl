@@ -119,7 +119,7 @@
           <div class="form-group input-lg">
             <label for="replyTo" class="col-lg-2 control-label">Responder para *</label>
             <div class="col-lg-10">
-              <input type="email" class="form-control input-lg" name="replyTo" id="replyTo" placeholder="Responder para qual e-mail?" required>
+              <input type="email" class="form-control input-lg" name="replyTo" id="replyTo" placeholder="Responder para qual e-mail?" value="${params.replyTo}" required>
             </div>
           </div>
           
@@ -135,7 +135,9 @@
             <div class="col-lg-10">
                 <textarea id="message" name="message" class="form-control input-lg" rows="7" required><%if (!params.message) {%>Olá,
 
-Seu certificado de participação segue em anexo.
+Seu certificado de participação está disponível para download no link abaixo:
+
+$link
 
 Atenciosamente
 ---
@@ -151,7 +153,7 @@ $params.message
           <div class="form-group">
             <div class="col-lg-10 col-lg-offset-2">
               <%if (request.pdfFields != "null" && request.pdfFields != null) {%> 
-                * Você pode utilizar os campos <b>$request.pdfFields</b>
+                * Você pode utilizar os campos: <b>\$link</b> e os opcionais <b>$request.pdfFields</b> (opcionais)
               <%} else {%>                 
                 * O template PDF não possui nenhum campo que possa ser utilizado.
               <%}%>
