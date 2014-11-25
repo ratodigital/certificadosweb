@@ -1,0 +1,14 @@
+appengine-generated
+classes
+build
+WEB-INF/lib
+out
+*.iml
+*.ipr
+*.iws
+*.*~
+.idea
+.gradle
+/.settings
+/.classpath
+/.project
