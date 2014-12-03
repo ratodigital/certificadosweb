@@ -25,8 +25,9 @@ public class Mail {
 			BodyPart messageBodyPart = new MimeBodyPart();
 
 			// Fill the message
-			messageBodyPart.setText(msgBody);
-
+			//messageBodyPart.setText(msgBody);
+			messageBodyPart.setContent(msgBody, "text/html; charset=utf-8");
+			
 			// Create a multipar message
 			Multipart multipart = new MimeMultipart();
 
