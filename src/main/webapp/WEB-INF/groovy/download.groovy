@@ -1,23 +1,31 @@
-import com.google.appengine.api.blobstore.BlobKey
+import util.*
 
-def blob = new BlobKey(params.key)
-//println blob == null
-//println "size:" + String.valueOf(blob.info.size)
+def blob = new Blob()
+
+def f = blob.getFile(params.key)
+response.setHeader("Content-Type", f.contentType);
+response.setHeader("Content-Length", String.valueOf(f.size));
+response.setHeader("Content-Disposition", "attachment;filename=\"$f.filename\"");
+blobstore.serve(f, response)	 
+
 /*
-println "File name: ${blob.filename} <br/>"
-println "Content type: ${blob.contentType}<br/>"
-println "Creation date: ${blob.creation}<br/>"
-println "Size: ${blob.size}"
-*/
+println "File name: ${f.filename} <br/>"
+println "Content type: ${f.contentType}<br/>"
+println "Creation date: ${f.creation}<br/>"
 def cert = datastore.execute {
 	select single from "log" 
 	where pdfKey == params.key
 }
 
-//println cert.email
-def filename = "${cert.email}.pdf" 
-response.setHeader("Content-Type", blob.contentType);
-response.setHeader("Content-Length", String.valueOf(blob.size));
-response.setHeader("Content-Disposition", "attachment;filename=\"$filename\"");
-blobstore.serve(blob, response)	 
-
+//PDF.getThumbnail(f,"${f.filename}.png")
+println "foi"
+f.withStream { inputStream -> 
+	try {
+		def pdf = new PDF()
+		pdf.open(inputStream) 
+		new ExtractImages().extractImages(pdf.pdf, "dest");
+	} catch (com.itextpdf.text.exceptions.InvalidPdfException e) {
+		return null;
+	}
+}
+*/

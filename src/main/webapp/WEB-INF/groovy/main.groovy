@@ -7,15 +7,18 @@ import model.*
  * PASSO 2: GETCSV      - Obter arquivo CSV
  * PASSO 3: GETMSGDATA  - Obter dados para envio
  * PASSO 4: SEND_EMAILS - Enviar emails
+ * PASSO 5: SUCCESS     - Foi tudo OK!
  *
  * ALTERNATIVAS:
  * PREVIEW: VISUALIZAR CERTIFICADO GERADO
  */
 
-def blob = new Blob()
+if (user == null) {
+	redirect "/login"
+	return
+} 
 
-def flush = ""
-def flushError = ""
+def blob = new Blob()
 
 if (!params.status) {
 	request.status = "GETPDF" 
@@ -32,17 +35,10 @@ switch (params.status) {
 		def pdfFile = blobs["pdfFile"]
 		request.pdfKey = pdfFile.keyString
 		request.pdfName = pdfFile.filename    
-		pdfFile.withStream { inputStream -> 
-			try {
-				def pdf = new PDF()
-				pdf.open(inputStream) 
-				if (pdf.listFormFields().size() > 0) {
-					request.pdfFields = "\$" + pdf.listFormFields().inject() { s,e -> s += ", \$$e" }
-				}
-			} catch (com.itextpdf.text.exceptions.InvalidPdfException e) {
-				request.status = "GETPDF"
-				request.flushError = 'Selecione  um arquivo PDF válido.'
-			}
+		request.pdfFields = getTemplateFieldsAsString(pdfFile)
+		if (request.pdfFields == null) {
+			request.status = "GETPDF"
+			request.flushError = 'Selecione  um arquivo PDF válido.'
 		}
 		forward "/WEB-INF/pages/main.gtpl"
 		break
@@ -59,89 +55,55 @@ switch (params.status) {
 	case "PREVIEW":     
 		def pdfFile = blob.getFile(params.pdfKey)
 		def csvFile = blob.getFile(params.csvKey)       
-		def csvData = CSV.getCSVData(csvFile)         
+		def csvData = CSV.getCSVData(csvFile) 
+       
 		def outputPdfName = "preview.pdf"
 		def pdfStamper = PDF.gerarPDF(pdfFile, csvData[0], outputPdfName)
 
 		response.setHeader("Content-Type", "application/pdf");
 		response.setHeader("Content-Length", String.valueOf(pdfStamper.blobKey.info.size));
 		response.setHeader("Content-Disposition", "attachment;filename=\"$outputPdfName\"");
-		blob.serveContent(file, response)
-		break   
+		blobstore.serve(pdfStamper.blobKey, response)
+		break
 	default: // PASSO 3. ENVIAR CERTIFICADOS
 		if (params.message.indexOf("\$link") == -1) {
 			flushError = 'Você obrigatoriamente deve usar o campo \$link.'
 		} else {      
-			def csvFile = blob.getFile(params.csvKey)          
-			def csvData = CSV.getCSVData(csvFile)
-			def pdfFile
 
-			if (csvData.size() <= Config.ROWS_LIMIT) {
-				pdfFile = blob.getFile(params.pdfKey) 
-				sucesso = 0
-				erro = 0
-				for (data in csvData) {
-					def outputPdfName = "${data['email']}_${pdfFile.filename}"
-					def pdfStamper = PDF.gerarPDF(pdfFile, data, outputPdfName)
-					def outputPdfBytes = blob.getBytes(pdfStamper) 
+			def returnMap = Certificado.enviarCertificados(
+				params.csvKey, 
+				params.pdfKey, 
+				params.message, 
+				params.subject, 
+				params.fromName, 
+				params.replyTo,
+				user.email,
+				true) // Simula o envio de certificados, para testar se tem problem nos parâmetros
 
-					//println "$params.subject Enviando arquivo '$outputPdfName' para email '${data['email']}'<br/>"	    
-					def pdfKey = pdfStamper.blobKey.keyString
+			// Adiciona o envio na fila de processamento
+			defaultQueue << [
+				url: "/send",
+				method: 'PUT', 
+				params: [csvKey: params.csvKey, 
+						 pdfKey: params.pdfKey, 
+						 message: params.message, 
+						 subject: params.subject, 
+						 fromName: params.fromName, 
+						 replyTo: params.replyTo,
+						 userEmail: user.email]
+			]			
+			
+			request.statusError = returnMap.statusError			
+			request.flushError = returnMap.flushError
 
-					def vars = PDF.getMessageVars(pdfFile, data)
-					vars.put "link", DOWNLOAD_LINK "${Config.DOWNLOAD_LINK}?key=$pdfKey"
-
-					def message = params.message
-					def subject = params.subject		  
-
-					try {
-						message = Script.evalScript(vars, params.message)
-						subject = Script.evalScript(vars, params.subject)
-
-						//println "MAIL SENT: $FROM_EMAIL $params.fromName ${data['email']} ${data['email']} $subject $message $outputPdfName<br><br>"
-
-						/*
-						Mail.send(Config.FROM_EMAIL, params.fromName, 
-						data['email'], data['email'], 
-						subject, message, params.replyTo,
-						outputPdfName, outputPdfBytes)
-						*/
-
-						new Logs().add(
-							params.fromName, 
-							data['email'],
-							params.replyTo,
-							subject,
-							message,
-							pdfStamper.blobKey.keyString,
-							outputPdfName,
-							"OK")
-
-						sucesso++          
-					} catch (groovy.lang.MissingPropertyException ex) {
-						def m = ex.getMessage()
-						def campo = m.substring(18,m.indexOf(" for"))
-						flushError = 'O campo \$' + campo + ' não existe no Template PDF.'
-						erro++
-					} finally {
-						if (sucesso > 0) {
-							flush = "$sucesso certificados enviados por email com sucesso!"
-						}
-						if (erro > 0) {
-							flushError = "$erro certificados apresentaram erro no envio."
-						}
-						//pdfStamper.delete()
-					} // end-try
-				} // end-for
-			} else {
-				status = "ERRO"
-				flushError = "Na versão Beta não é possível enviar mais de 100 certificados."
-			}
-
-			request.flush = flush
-			request.flushError = flushError
-			if (flushError == "") {
-				forward "/WEB-INF/pages/success.gtpl"      
+			if (request.flushError == "" && request.statusError == "") {
+				def csvSize = CSV.getCSVSize(blob.getFile(params.csvKey))
+				request.flush = "$csvSize certificado(s) estão sendo gerados e preparados para envio.<br><br>" +
+						 "Em pouco tempo você receberá um e-mail de <strong>certificadospdf@gmail.com</strong>," + 
+						 "<br>assim que o processamento for concluído."
+			
+				request.status = "SUCCESS"
+				forward "/WEB-INF/pages/main.gtpl"      
 			} else {
 				request.status = "GETMSGDATA"
 				request.pdfKey = params.pdfKey
@@ -157,3 +119,19 @@ switch (params.status) {
 		} // end-if
 } // end-switch
 
+// Lê um arquivo pdf do BLOB e obtem a coleção de campos do template
+def getTemplateFieldsAsString(pdfFile) {
+	def pdfFields = "" 
+	pdfFile.withStream { inputStream -> 
+		try {
+			def pdf = new PDF()
+			pdf.open(inputStream) 
+			if (pdf.listFormFields().size() > 0) {
+				pdfFields = "\$" + pdf.listFormFields().inject() { s,e -> s += ", \$$e" }
+				return pdfFields
+			}
+		} catch (com.itextpdf.text.exceptions.InvalidPdfException e) {
+			return null;
+		}
+	}
+}

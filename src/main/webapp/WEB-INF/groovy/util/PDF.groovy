@@ -67,6 +67,10 @@ class PDF {
     		pdf.close();			
 	}
 
+	def getPdfReader() {
+		pdfReader()
+	}
+
 	static def gerarPDF(pdfFile, data, outputPdfName) {
 		byte[] outputPdfBytes
 		def pdfStamper
@@ -74,7 +78,7 @@ class PDF {
 		pdfFile.withStream { inputStream -> 
 			def pdf = new PDF()
 			pdf.open(inputStream) 
-			pdfStamper = files.createNewBlobFile("application/pdf")
+			pdfStamper = files.createNewBlobFile("application/pdf", outputPdfName)
 			pdfStamper.withOutputStream(locked: true, finalize: true) { outputStream ->
 				pdf.preparePdfStamper(outputStream)
 				pdf.listFormFields().each { fieldName ->

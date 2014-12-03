@@ -1,3 +1,5 @@
+    </div> <!-- container -->
+  
     <hr>
     
     <div id="footer">

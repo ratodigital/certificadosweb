@@ -10,25 +10,32 @@ import java.util.Set;
 
 class CSV {
 	static def getCSVData(csvFile) {
-	  def csvData = []
-	  csvFile.withStream { csvInputStream ->
-	    def fieldNames = []
-	    def f = 1 
-	    csvInputStream.splitEachLine(",") { fields ->
-	      if (fields.size() > 1) {
-		if (f++==1) {
-		  fieldNames = fields      
-		} else {
-		  def fieldsMap = [:]
-		  fieldNames.eachWithIndex { key, index ->
-		    fieldsMap[key] = fields[index]
-		  }
-		  csvData << fieldsMap
+		def csvData = []
+		csvFile.withStream { csvInputStream ->
+			def fieldNames = []
+			def f = 1 
+			csvInputStream.splitEachLine(",") { fields ->
+				if (fields.size() > 1) {
+					if (f++==1) {
+						fieldNames = fields      
+					} else {
+						def fieldsMap = [:]
+						fieldNames.eachWithIndex { key, index ->
+							fieldsMap[key] = fields[index]
+						}
+						csvData << fieldsMap
+					}
+			  	}
+			}
 		}
-	      }
-	    }
-	  }
-	  csvData
-	  //println "CSVDATA=$csvData<br/>"
+		csvData
+	}
+
+	static def getCSVSize(csvFile) {
+		getCSVData(csvFile).size()
+	}
+		
+	static def getCSVHeader(cvsData) {
+		cvsData.keySet()
 	}
 }

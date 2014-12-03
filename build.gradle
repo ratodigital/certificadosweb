@@ -48,16 +48,10 @@ dependencies {
     compile "com.google.appengine:appengine-api-1.0-sdk:$gaeVersion",
             "com.google.appengine:appengine-api-labs:$gaeVersion"
     compile 'org.gaelyk:gaelyk:2.0'
-		compile files("lib/itextg-5.4.3.jar")
-/*
-   compile files("$buildDir/classes") {
-        builtBy 'compile'
-    }
-		compile files ("src/main/webapp/WEB-INF/lib/itextg-5.4.3.jar") {
-			builtBy('compile')
-		}
-*/
-//		compile "com.itextpdf:itextpdf:5.4.3"    
+    compile "org.apache.pdfbox:pdfbox:1.8.7"    
+	compile files("lib/itextg-5.4.3.jar")
+	compile files("lib/PDFRenderer-0.9.1.jar")
+
     
 
     /** 

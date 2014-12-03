@@ -23,7 +23,7 @@ public class Logs {
         }
     }
 
-    def add(name,email,replyTo,subject,message,pdfKey,pdfName,status) {
+    def add(name,email,replyTo,subject,message,vars,templateKey,csvKey,pdfKey,pdfName,userEmail,status) {
         datastore.withTransaction {
 			Entity e = new Entity("log")
 			e.name = name
@@ -31,10 +31,14 @@ public class Logs {
 			e.replyTo = replyTo
 			e.subject = subject
 			e.message = message
+            e.vars = vars
+			e.templateKey = templateKey
+			e.csvKey = csvKey
 			e.pdfKey = pdfKey
 			e.pdfName = pdfName
 			e.status = status
-			e.dateCreated = new Date()
+			e.userEmail = userEmail
+			e.dateCreated = (new Clock()).getDateTime()
 			e.save()
         }
     }

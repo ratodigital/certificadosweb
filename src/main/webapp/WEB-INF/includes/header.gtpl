@@ -19,7 +19,47 @@
   </head>
 
   <body>
+  
+  	<!-- Main jumbotron for a primary marketing message or call to action
+	<div class="jumbotron">
+	  <div class="container">
+	    <h1>Certificados PDF <small>Beta</small></h1>
+	    <p class="text-center">A maneira mais fácil e rápida de enviar certificados de participação em cursos e eventos por e-mail. Com apenas 3 passos todos os participantes recebem um email padrão com o certificado anexado em formato PDF.</p>
+	  </div>
+  </div>
+   -->
 
+	<div class="container">
+	
+	    <%if (user) {%>
+		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				  <span class="sr-only">Toggle navigation</span>
+				  <span class="icon-bar"></span>
+				  <span class="icon-bar"></span>
+				  <span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="/">CertificadosPDF</a>
+			</div>
+
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				<ul class="nav navbar-nav navbar-right">
+					<%if (user != null) {%>
+					<li class="dropdown user-dropdown">
+					  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-user"></i> ${user?.nickname}<b class="caret"></b></a>
+					  <ul class="dropdown-menu">
+					    <li><a href="${users.createLogoutURL('/')}"><i class="fa fa-sign-out"></i> Logout</a></li>
+					  </ul>
+					</li>
+					<%} else {%>
+					<li><a href="/login?continueTo=http://${request.serverName}:${request.serverPort}"><i class="fa fa-sign-in"></i> Login </a></li>
+					<%}%>
+				</ul>
+			</div><!-- /.navbar-collapse -->
+		</nav><!-- /.nav -->
+        <br/>		
+		<%}%>
 
 
 
