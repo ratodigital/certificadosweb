@@ -29,7 +29,7 @@ public class Certificado {
 				//println "$subject Enviando arquivo '$outputPdfName' para email '${data['email']}'<br/>"	    
 
 				def vars = PDF.getMessageVars(pdfFile, data)
-				vars.put "link", "<a href=\"${Config.DOWNLOAD_LINK}?key=$pdfStamper\">Clique AQUI para baixar</a>"
+				vars.put "link", "<a href=\"${Config.DOWNLOAD_LINK}?key=${pdfStamper.blobKey.keyString}\">Clique AQUI para baixar</a>"
 
 				try {
 					message = Script.evalScript(vars, message)
