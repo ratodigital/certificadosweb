@@ -78,26 +78,30 @@ switch (params.status) {
 				params.fromName, 
 				params.replyTo,
 				user.email,
-				true) // Simula o envio de certificados, para testar se tem problem nos parâmetros
+				user.nickname,
+				true) // Simula o envio de certificados, para testar se tem problema nos parâmetros
 
-			// Adiciona o envio na fila de processamento
-			defaultQueue << [
-				url: "/send",
-				method: 'PUT', 
-				params: [csvKey: params.csvKey, 
-						 pdfKey: params.pdfKey, 
-						 message: params.message, 
-						 subject: params.subject, 
-						 fromName: params.fromName, 
-						 replyTo: params.replyTo,
-						 userEmail: user.email]
-			]			
-			
 			request.statusError = returnMap.statusError			
 			request.flushError = returnMap.flushError
 
 			if (request.flushError == "" && request.statusError == "") {
+
 				def csvSize = CSV.getCSVSize(blob.getFile(params.csvKey))
+
+				// Adiciona o envio na fila de processamento
+				defaultQueue << [
+					url: "/send",
+					method: 'PUT', 
+					params: [csvKey: params.csvKey, 
+							 pdfKey: params.pdfKey, 
+							 message: params.message, 
+							 subject: params.subject, 
+							 fromName: params.fromName, 
+							 replyTo: params.replyTo,
+							 userEmail: user.email,
+							 userName: user.nickname]
+				]	
+			
 				request.flush = "$csvSize certificado(s) estão sendo gerados e preparados para envio.<br><br>" +
 						 "Em pouco tempo você receberá um e-mail de <strong>certificadospdf@gmail.com</strong>," + 
 						 "<br>assim que o processamento for concluído."

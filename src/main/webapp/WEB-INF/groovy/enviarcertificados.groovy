@@ -7,7 +7,8 @@ def returnMap = Certificado.enviarCertificados(
 	params.subject, 
 	params.fromName, 
 	params.replyTo,
-	params.userEmail)
+	params.userEmail,
+	params.userName)
 
 request.status = returnMap.status
 request.statusError = returnMap.statusError			

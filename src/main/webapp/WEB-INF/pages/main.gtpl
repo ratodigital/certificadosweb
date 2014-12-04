@@ -96,65 +96,66 @@
 				<input name="pdfName" type="hidden" value="$request.pdfName"/>  
 				<input name="pdfFields" type="hidden" value="$request.pdfFields"/>    
 
-          <%
-          if (request.status == 'GETPDF') {
-          %>       
-          <input name="status" type="hidden" value="GETCSV"/>          
-  			  <div class="form-group input-lg">
-    			  <label for="file" class="col-lg-2 control-label">PDF</label>
-					  <span class="input-group-btn">
-              <input type="file" class="input-lg" name="pdfFile" required/><br/>
-					  </span>
-				  </div>   
-				  <%  
-          } else if (request.status == 'GETCSV') {
-          %>
-          <input type="hidden" name="status" value="GETMSGDATA">
-  			  <div class="form-group input-lg">
-    			  <label for="file" class="col-lg-2 control-label">CSV</label>
-					  <span class="input-group-btn">
-              <input type="file" class="input-lg" name="csvFile" required/><br/>
-					  </span>
-				  </div>              
-          <%
-          } else if (request.status == 'GETMSGDATA') {
-          %>
-          <input type="hidden" id="status" name="status" value="SENDPDF"/>  
-          <input name="csvKey" type="hidden" value="$request.csvKey"/>          
-          
-          <div class="form-group input-lg">
-            <label for="fromEmail" class="col-lg-2 control-label">Email do rementente</label>
-            <div class="col-lg-10">
-              <input type="email" class="form-control input-lg" name="fromEmail" id="fromEmail" placeholder="Email" value="certificadospdf@gmail.com" disabled>
-            </div>
-          </div>
+				<%
+				if (request.status == 'GETPDF') {
+				%>       
+				<input name="status" type="hidden" value="GETCSV"/>          
+				<div class="form-group input-lg">
+					<label for="file" class="col-lg-2 control-label">PDF</label>
+					<span class="input-group-btn">
+						<input type="file" class="input-lg" name="pdfFile" required/><br/>
+					</span>
+				</div>   
+				<%  
+				} else if (request.status == 'GETCSV') {
+          		%>
+          		<input type="hidden" name="status" value="GETMSGDATA"/>
+				<div class="form-group input-lg">
+					<label for="file" class="col-lg-2 control-label">CSV</label>
+					<span class="input-group-btn">
+						<input type="file" class="input-lg" name="csvFile" required/><br/>
+					</span>
+				</div>              
+				<%
+				} else if (request.status == 'GETMSGDATA') {
+				%>
+          		<input type="hidden" id="status" name="status" value="SENDPDF"/>  
+				<input name="csvKey" type="hidden" value="$request.csvKey"/>          
+				<div class="form-group input-lg">
+					<label for="fromEmail" class="col-lg-2 control-label">Email do rementente</label>
+					<div class="col-lg-10">
+						<input type="email" class="form-control input-lg" name="fromEmail" id="fromEmail" placeholder="Email" value="certificadospdf@gmail.com" disabled/>
+					</div>
+				</div>
 
-          <div class="form-group input-lg">
-            <label for="fromName" class="col-lg-2 control-label">Nome do remetente</label>
-            <div class="col-lg-10">
-              <input type="text" class="form-control input-lg" name="fromName" id="fromName" value="${params.fromName ?: 'Certificados PDF'}" required>
-            </div>
-          </div>    
+				<div class="form-group input-lg">
+					<label for="fromName" class="col-lg-2 control-label">Nome do remetente</label>
+					<div class="col-lg-10">
+						<input type="text" class="form-control input-lg" name="fromName" id="fromName" value="${params.fromName ?: 'Certificados PDF'}" required/>
+					</div>
+				</div>    
 
-          <div class="form-group input-lg">
-            <label for="replyTo" class="col-lg-2 control-label">Responder para</label>
-            <div class="col-lg-10">
-              <input type="email" class="form-control input-lg" name="replyTo" id="replyTo" placeholder="Responder para qual e-mail?" value="${params.replyTo ?: ''}" required>
-            </div>
-          </div>
+				<div class="form-group input-lg">
+					<label for="replyTo" class="col-lg-2 control-label">Responder para</label>
+					<div class="col-lg-10">
+						<input type="email" class="form-control input-lg" name="replyTo" id="replyTo" placeholder="Responder para qual e-mail?" value="${params.replyTo ?: ''}" required/>
+					</div>
+				</div>
           
-          <div class="form-group input-lg">
-            <label for="subject" class="col-lg-2 control-label">Assunto *</label>
-            <div class="col-lg-10">
-              <input type="text" class="form-control input-lg" name="subject" id="subject" value="${params.subject ?: 'Seu certificado está pronto!'}" required>
-            </div>
-          </div>    
-          
-          <div class="form-group input-lg">
-            <label for="message" class="col-lg-2 control-label">Mensagem *</label>
-            <div class="col-lg-10">
-                <textarea id="message" name="message" class="form-control input-lg" rows="8" required>
-<%if (!params.message) {%>Olá,
+				<div class="form-group input-lg">
+					<label for="subject" class="col-lg-2 control-label">Assunto *</label>
+					<div class="col-lg-10">
+						<input type="text" class="form-control input-lg" name="subject" id="subject" value="${params.subject ?: 'Seu certificado está pronto!'}" required/>
+					</div>
+				</div>    
+						  
+				<div class="form-group input-lg">
+					<label for="message" class="col-lg-2 control-label">Mensagem *</label>
+					<div class="col-lg-10">
+						<textarea id="message" name="message" class="form-control input-lg" rows="8" required>
+<%
+// MANTENHA ESSE BLOCO NA ESQUERDA!!!
+if (!params.message) {%>Olá,
 
 Seu certificado de participação está disponível para download:
 \$link
@@ -165,52 +166,51 @@ certificadospdf.appspot.com
 <%} else {%>
 $params.message
 <%}%>
-                </textarea>
-            </div>
-          </div>              
+               			</textarea>
+            		</div>
+          		</div>              
 
-          <div class="form-group">
-            <div class="col-lg-10 col-lg-offset-2">
-              <%if (request.pdfFields != "null" && request.pdfFields != null) {%> 
-                * É obrigatório usar <b>\$link</b>. Você também poderá usar <b>$request.pdfFields</b>
-              <%} else {%>                 
-                * O template PDF não possui nenhum campo que possa ser utilizado.
-              <%}%>
-            </div>
-          </div>    
+				<div class="form-group">
+					<div class="col-lg-10 col-lg-offset-2">
+						<%if (request.pdfFields != "null" && request.pdfFields != null) {%> 
+						* É obrigatório usar <b>\$link</b>. Você também poderá usar <b>$request.pdfFields</b>
+						<%} else {%>                 
+						* O template PDF não possui nenhum campo que possa ser utilizado.
+						<%}%>
+					</div>
+				</div>    
 
-          <br/> 
-          <div class="form-actions">
-            <%
-            } 
-            if (request.status == "SUCCESS") {
-	            submitButton = "Reiniciar <span class=\"glyphicon glyphicon-home\">"
-            } else {
-	            submitButton = "Próximo <span class=\"glyphicon glyphicon-chevron-right\">"
-			}
-            if (request.status == 'GETMSGDATA') {
-            %>
-            <div class="pull-left">
-				<button class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Veja uma prévia de como ficará o PDF" data-original-title="Veja uma prévia de como ficará o PDF" onclick="submitPreview();"><span class="glyphicon glyphicon-eye-open"></span> Preview</button>
-            </div>
-            <%
-              submitButton = "Enviar certificados <span class=\"glyphicon glyphicon-ok\">"            
-            }
-            %>
-            <div class="pull-right">
-              <button class="btn btn-primary btn-lg" onclick="submitForm();">$submitButton</span></button>
-            </div>
-          </div>
+				<br/> 
+				<div class="form-actions">
+				<%
+				} 
+				if (request.status == "SUCCESS") {
+					submitButton = "Reiniciar <span class=\"glyphicon glyphicon-home\">"
+				} else {
+					submitButton = "Próximo <span class=\"glyphicon glyphicon-chevron-right\">"
+				}
+				if (request.status == 'GETMSGDATA') {
+				%>
+				<div class="pull-left">
+					<button class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Veja uma prévia de como ficará o PDF" data-original-title="Veja uma prévia de como ficará o PDF" onclick="submitPreview();"><span class="glyphicon glyphicon-eye-open"></span> Preview</button>
+				</div>
+				<%
+					submitButton = "Enviar certificados <span class=\"glyphicon glyphicon-ok\">"            
+				}
+				%>
+				<div class="pull-right">
+					<button class="btn btn-primary btn-lg" onclick="submitForm();">$submitButton</span></button>
+				</div>
+			</div> <!-- end: form-actions -->
         </form>	                             
-      </div> <!-- col-md-10 -->
-    </div> <!-- row -->
+      </div> <!-- end: col-md-10 -->
+    </div> <!-- end: row -->
 
-    <div class="container">
-      <% include '/WEB-INF/includes/divPdf.gtpl' %>	
-      <% include '/WEB-INF/includes/divEmail.gtpl' %>     
-      <% include '/WEB-INF/includes/divCsv.gtpl' %>		      
-    </div>
-    
+	<div class="container">
+		<% include '/WEB-INF/includes/divPdf.gtpl' %>	
+		<% include '/WEB-INF/includes/divEmail.gtpl' %>     
+		<% include '/WEB-INF/includes/divCsv.gtpl' %>		      
+	</div>
  
 <% include '/WEB-INF/includes/footer.gtpl' %>
 

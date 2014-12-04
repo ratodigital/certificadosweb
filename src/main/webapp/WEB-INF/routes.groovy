@@ -18,3 +18,4 @@ get "/log", forward: "/log.groovy"
 get "/download", forward: "/download.groovy"
 get "/certificado/@id", forward: "/certificado.groovy?id=@id"
 
+get "/mc", forward: "/mc.groovy"
