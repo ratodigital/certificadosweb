@@ -44,12 +44,15 @@ switch (params.status) {
 		break
 	case "GETMSGDATA":
 		//CSV
-		def blobs = blob.getUploadedBlobs(request)
-		def csvFile = blobs["csvFile"]
+		if (params.selListaMC == "" || params.selListaMC == null) {
+			def blobs = blob.getUploadedBlobs(request)
+			def csvFile = blobs["csvFile"]
+			request.csvKey = csvFile.keyString  
+		}
 		request.pdfKey = params.pdfKey
 		request.pdfName = params.pdfName
 		request.pdfFields = params.pdfFields
-		request.csvKey = csvFile.keyString      
+   		request.listaMC = params.selListaMC
 		forward "/WEB-INF/pages/main.gtpl"
 		break
 	case "PREVIEW":     

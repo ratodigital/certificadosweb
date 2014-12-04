@@ -18,4 +18,6 @@ get "/log", forward: "/log.groovy"
 get "/download", forward: "/download.groovy"
 get "/certificado/@id", forward: "/certificado.groovy?id=@id"
 
-get "/mc", forward: "/mc.groovy"
+get "/mailchimp/lists/@apikey", forward: "/mc.groovy?apikey=@apikey"
+get "/mailchimp/list/export/@apikey/@listID", forward: "/mclist.groovy?apikey=@apikey&listID=@listID"
+

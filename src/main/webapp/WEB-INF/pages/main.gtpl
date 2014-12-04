@@ -74,7 +74,8 @@
 				
 				if (image != "") {
 				%>	    
-					<p class="text-center"><img src="/images/${image}.png" width="128px" height="128px" alt="PDF"></p>	
+					<p class="text-center"><img src="/images/${image}.png" width="128px" height="128px" alt="PDF" ng-show="radioData != 'MC'"></p>	
+					<p class="text-center"><img src="/images/mailchimp.png" width="128px" height="128px" alt="PDF" ng-show="radioData == 'MC'"></p>	
 				<%}%>
 			</div>	  
 	    
@@ -100,25 +101,64 @@
 				if (request.status == 'GETPDF') {
 				%>       
 				<input name="status" type="hidden" value="GETCSV"/>          
+
 				<div class="form-group input-lg">
 					<label for="file" class="col-lg-2 control-label">PDF</label>
 					<span class="input-group-btn">
 						<input type="file" class="input-lg" name="pdfFile" required/><br/>
 					</span>
+				</div>   		
+						
+				<div class="form-group input-lg">
+					<div class="col-lg-2"></div>
+					<div class="col-lg-6">
+						<div class="checkbox">&nbsp;&nbsp;
+							<label>
+								<input type="checkbox" name="chkSalvarPDF" ng-model="chkSalvarPDF">Salvar template PDF para uso futuro
+								<input type="text" class="form-control" size="10" name="templateName" id="templateName" placeholder="Nome do Template" ng-show="chkSalvarPDF" />
+							</label>
+						</div>						
+					</div>
 				</div>   
 				<%  
 				} else if (request.status == 'GETCSV') {
           		%>
           		<input type="hidden" name="status" value="GETMSGDATA"/>
-				<div class="form-group input-lg">
+				<div class="radio">
+					<h3><input type="radio" id="radioData1" name="radioData" ng-model="radioData" value="CSV" checked="checked">Arquivo CSV</h3>
+				</div>
+
+				<div class="form-group input-lg" ng-show="radioData == 'CSV'">
 					<label for="file" class="col-lg-2 control-label">CSV</label>
 					<span class="input-group-btn">
-						<input type="file" class="input-lg" name="csvFile" required/><br/>
+						<input type="file" class="input-lg" name="csvFile" ng-required="radioData == 'CSV'"/><br/>
 					</span>
-				</div>              
+				</div>  	
+								
+				<div class="radio">
+					<h3><input type="radio" id="radioData2" name="radioData" ng-model="radioData" value="MC">Lista do MailChimp</h3>
+				</div>          		
+  
+				<div class="form-group input-lg" ng-show="radioData == 'MC'">
+					<div class="col-lg-2"></div>
+					<div class="col-lg-6">
+						<div class="input-group">
+							<input type="text" class="form-control" size="10" name="apiKey" id="apiKey" placeholder="Mailcimp ApiKey" ng-model="apikey" ng-required="radioData == 'MC'"/>
+							<span class="input-group-btn">
+								<a class="btn btn-primary" ng-click="listasMailchimp()">Obter Listas</span></a><span ng-model="wait" ng-show="wait">Aguarde...</span>
+							</span>
+						</div>	
+						<span ng-model="wait" ng-show="error != ''">{{error}}</span>
+						<select class="form-control" id="selListaMC" name="selListaMC" ng-show="mailchimpLists.total > 0" ng-required="radioData == 'MC'"> 
+							<option value="">--- Selecione a lista ---</option>										
+							<option value="{{l.id}}" ng-repeat="l in mailchimpLists.list">{{l.name}} ({{l.size}})</option>
+						</select>
+					</div>
+				</div> 				          
 				<%
 				} else if (request.status == 'GETMSGDATA') {
 				%>
+				$request.listaMC
           		<input type="hidden" id="status" name="status" value="SENDPDF"/>  
 				<input name="csvKey" type="hidden" value="$request.csvKey"/>          
 				<div class="form-group input-lg">

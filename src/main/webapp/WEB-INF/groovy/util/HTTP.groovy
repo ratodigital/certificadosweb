@@ -22,6 +22,9 @@ public class HTTP {
 	}	
 	
 	static def get(url, params) {
-		new URL(url + "?" + params).getText("iso-8859-1")
+		def urlGet = url + "?" + params	
+		def result = new URL(urlGet).getText("iso-8859-1")
+		result
+		//new JsonSlurper().parseText(result)
 	}		
 }

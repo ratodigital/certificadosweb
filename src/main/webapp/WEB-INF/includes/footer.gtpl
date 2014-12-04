@@ -9,79 +9,87 @@
       </div>
     </div>
     
+    <!-- Angular.js -->
+    
+	<!-- ANGULAR -->
+	<script src="/js/angular.min.js"></script>
+	<script src="/js/angular-resource.min.js"></script>		
+	<script src="/js/angular-route.min.js"></script>
+
+	<!-- ANGULAR APP -->
+	<script src="/js/app/app.js"></script>
+	    
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 
     <script src="/js/bootstrap.min.js"></script>
-		<script>
-		
+	<script>
 		function showDivPdf() {
 			toogle('divPdf');
-      hide('divCsv');      
-      hide('divEmail');
-      toogleOff('btnCsv');
-      toogleOff('btnEmail');
-      window.location = '#divPdf';
+			hide('divCsv');      
+			hide('divEmail');
+			toogleOff('btnCsv');
+			toogleOff('btnEmail');
+			window.location = '#divPdf';
 		}
 		
 		function showDivCsv() {
-      hide('divPdf');
+			hide('divPdf');
 			toogle('divCsv');
-      hide('divEmail');      			
-      toogleOff('btnPdf');
-      toogleOff('btnEmail');
-      window.location = '#divCsv';      
+			hide('divEmail');      			
+			toogleOff('btnPdf');
+			toogleOff('btnEmail');
+			window.location = '#divCsv';      
 		}
 
 		function showDivEmail() { 
-      hide('divPdf');
-      hide('divCsv');      
+			hide('divPdf');
+			hide('divCsv');      
 			toogle('divEmail');
-      toogleOff('btnPdf');
-      toogleOff('btnCsv');
-      window.location = '#divEmail';
+			toogleOff('btnPdf');
+			toogleOff('btnCsv');
+			window.location = '#divEmail';
 		}
 
 		function show(divId) {
-  		(jQuery)('#'+divId).show();
+  			(jQuery)('#'+divId).show();
 		}
 				
 		function hide(divId) {
-  		(jQuery)('#'+divId).hide();
+  			(jQuery)('#'+divId).hide();
 		}
 		
 		function toogleOff(btn) {
-//		  (jQuery)('#'+btn).button('reset');
-      (jQuery)('#'+btn).removeClass('active');
-    }
+      		(jQuery)('#'+btn).removeClass('active');
+    	}
     
 		function toogle(divId, showOrHide) {
-      if (((jQuery)('#'+divId).css("display") == 'none')) {
-        show(divId);
-      } else {
-        hide(divId);
-      }
+			if (((jQuery)('#'+divId).css("display") == 'none')) {
+				show(divId);
+			} else {
+				hide(divId);
+			}
 		}
 		
-    function scrollToDiv(element,navheight){
-      var offset = element.offset();
-      var offsetTop = offset.top;
-      var totalScroll = offsetTop-navheight;
-      (jQuery)('body,html').animate({
-        scrollTop: totalScroll
-      }, 500);
-    }		
-    
-    function submitPreview() {
-      document.getElementById('status').value = "PREVIEW";
-      document.pdfForm.submit();
-    }
-    
-    function submitForm() {
-      document.getElementById('status').value = "SEND_EMAILS";
-      document.pdfForm.submit();
-    }					    
+		function scrollToDiv(element,navheight){
+			var offset = element.offset();
+			var offsetTop = offset.top;
+			var totalScroll = offsetTop-navheight;
+			(jQuery)('body,html').animate({
+				scrollTop: totalScroll
+			}, 500);
+		}		
+
+		function submitPreview() {
+			document.getElementById('status').value = "PREVIEW";
+			document.pdfForm.submit();
+		}
+
+		function submitForm() {
+			document.getElementById('status').value = "SEND_EMAILS";
+			document.pdfForm.submit();
+		}					    
 		</script>		
 		<script>
 		  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

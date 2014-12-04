@@ -1,8 +1,8 @@
-<html>
+<html ng-app="app">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   	<meta name="keywords" content="certificado, pdf, mala direta, envio, email, template, libreoffice, csv" />
-		<meta name="description" content="<%if (!params.title) {%>Certificados PDF<%} else {%>Certificados PDF - $params.title<%}%>" />
+		<meta name="description" content="<%if (!params.title) {%>{{appName}}<%} else {%>{{appName}} - $params.title<%}%>" />
 		<meta name="author" content="Serge Rehem" />
 		<meta name="robots" content="follow, index" />		
     <link rel="shortcut icon" href="/favicon.ico">
@@ -18,12 +18,12 @@
     <![endif]-->
   </head>
 
-  <body>
+  <body ng-controller="AppCtrl">
   
   	<!-- Main jumbotron for a primary marketing message or call to action
 	<div class="jumbotron">
 	  <div class="container">
-	    <h1>Certificados PDF <small>Beta</small></h1>
+	    <h1>{{appName}} <small>Beta</small></h1>
 	    <p class="text-center">A maneira mais fácil e rápida de enviar certificados de participação em cursos e eventos por e-mail. Com apenas 3 passos todos os participantes recebem um email padrão com o certificado anexado em formato PDF.</p>
 	  </div>
   </div>
@@ -40,7 +40,7 @@
 				  <span class="icon-bar"></span>
 				  <span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="/">CertificadosPDF</a>
+				<a class="navbar-brand" href="/">{{appName}}</a>
 			</div>
 
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
