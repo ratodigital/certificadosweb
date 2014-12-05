@@ -38,18 +38,22 @@ class Mailchimp {
 	
 	def listSize(listID) {
 		def json = HTTP.post("$endpointV2/lists/members.json", 
-			"{\"apikey\": \"$apikey\", \"id\": \"$listID\", \"opts\": {\"start\": 0, \"limit\": 0}}")
+			"{\"apikey\": \"$apikey\", \"id\": \"$listID\", \"opts\": {\"start\": 1, \"limit\": 1}}")
 		return json.total
 	}	
 		
 	def listExport(listID) {
 		try {
-			def ret = HTTP.get("$endpointV1/export/1.0/list","apikey=$apikey&id=$listID")
-			//ret = ret.replaceAll("\"","")
-			//ret.eachLine { l ->
-				//l = l.replaceAll("[","") //.replaceAll("]","").replaceAll("\"","")				
-				//println "linex: ${l[0]}"+l //"${l[0]} ${l[1]} ${l[2]}"
-			//}
+			def res = HTTP.get("$endpointV1/export/1.0/list","apikey=$apikey&id=$listID")
+			def i = 0
+			def data = []
+			res.eachLine { l ->
+				def var = Eval.me(l)
+				if (i++ > 0) {
+					data << [email:var[0], nome: "${var[1]} ${var[2]}", pnome: var[1], unome: var[2]]
+				}
+			}
+			return data			
 		} catch(Exception ex) {
 			return ex.getMessage()
 		}

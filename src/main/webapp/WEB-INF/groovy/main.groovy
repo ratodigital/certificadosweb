@@ -47,7 +47,19 @@ switch (params.status) {
 		if (params.selListaMC == "" || params.selListaMC == null) {
 			def blobs = blob.getUploadedBlobs(request)
 			def csvFile = blobs["csvFile"]
-			request.csvKey = csvFile.keyString  
+			def dataFile = blob.createFile("text/plain", csvFile.filename, CSV.getData(csvFile))
+			request.dataKey = dataFile.blobKey.keyString  
+			request.dataHeader = CSV.getHeader(dataFile)
+		} else {
+			def mc = new Mailchimp(params.apikey)
+			try {
+				def file = files.createNewBlobFile("text/plain", "hello.txt")
+				file.withWriter { writer ->
+					writer << mc.listExport(params.listID)
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace()
+			}		
 		}
 		request.pdfKey = params.pdfKey
 		request.pdfName = params.pdfName
@@ -57,12 +69,22 @@ switch (params.status) {
 		break
 	case "PREVIEW":     
 		def pdfFile = blob.getFile(params.pdfKey)
-		def csvFile = blob.getFile(params.csvKey)       
-		def csvData = CSV.getCSVData(csvFile) 
-       
+		def previewData
+		if (params.dataKey) {
+			def dataArray = blob.getFile(params.dataKey)       
+			previewData = dataArray[0]
+        } else if (params.selListaMC == "" || params.selListaMC == null) {
+			def mc = new Mailchimp(params.apikey)
+			def mcData = []
+			try {
+				mcData =  mc.listExport(params.listID)
+				previewData = mcData[0]
+			} catch (Exception ex) {
+				ex.printStackTrace()
+			}
+        }
 		def outputPdfName = "preview.pdf"
-		def pdfStamper = PDF.gerarPDF(pdfFile, csvData[0], outputPdfName)
-
+		def pdfStamper = PDF.gerarPDF(pdfFile, previewData, outputPdfName)
 		response.setHeader("Content-Type", "application/pdf");
 		response.setHeader("Content-Length", String.valueOf(pdfStamper.blobKey.info.size));
 		response.setHeader("Content-Disposition", "attachment;filename=\"$outputPdfName\"");
@@ -73,8 +95,9 @@ switch (params.status) {
 			flushError = 'Você obrigatoriamente deve usar o campo \$link.'
 		} else {      
 
+			def dataArray = blob.getContentByKey(params.dataKey)
 			def returnMap = Certificado.enviarCertificados(
-				params.csvKey, 
+				params.dataKey, 
 				params.pdfKey, 
 				params.message, 
 				params.subject, 
@@ -89,13 +112,13 @@ switch (params.status) {
 
 			if (request.flushError == "" && request.statusError == "") {
 
-				def csvSize = CSV.getCSVSize(blob.getFile(params.csvKey))
+				def csvSize = CSV.getSize(blob.getFile(params.dataKey))
 
 				// Adiciona o envio na fila de processamento
 				defaultQueue << [
 					url: "/send",
 					method: 'PUT', 
-					params: [csvKey: params.csvKey, 
+					params: [dataKey: params.dataKey, 
 							 pdfKey: params.pdfKey, 
 							 message: params.message, 
 							 subject: params.subject, 
@@ -118,7 +141,7 @@ switch (params.status) {
 				request.pdfFields = params.pdfFields
 				request.replyTo = params.replyTo        
 				request.fromName = params.fromName
-				request.csvKey = params.csvKey
+				request.dataKey = params.dataKey
 				request.subject = params.subject
 				request.message = params.message
 				forward "/WEB-INF/pages/main.gtpl"      
@@ -127,18 +150,23 @@ switch (params.status) {
 } // end-switch
 
 // Lê um arquivo pdf do BLOB e obtem a coleção de campos do template
-def getTemplateFieldsAsString(pdfFile) {
-	def pdfFields = "" 
+def getTemplateFieldsMap(pdfFile) {
+	def pdfFields
 	pdfFile.withStream { inputStream -> 
 		try {
 			def pdf = new PDF()
 			pdf.open(inputStream) 
-			if (pdf.listFormFields().size() > 0) {
-				pdfFields = "\$" + pdf.listFormFields().inject() { s,e -> s += ", \$$e" }
-				return pdfFields
-			}
+			return pdf.listFormFields()
 		} catch (com.itextpdf.text.exceptions.InvalidPdfException e) {
 			return null;
 		}
+	}
+}
+
+def getTemplateFieldsAsString(pdfFile) {
+	listFormFields = getTemplateFieldsMap(pdfFile)
+	if (listFormFields.size() > 0) {
+		pdfFields = "\$" + listFormFields.inject() { s,e -> s += ", \$$e" }
+		return pdfFields
 	}
 }

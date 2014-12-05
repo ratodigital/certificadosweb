@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 class CSV {
-	static def getCSVData(csvFile) {
+	static def getData(csvFile) {
 		def csvData = []
 		csvFile.withStream { csvInputStream ->
 			def fieldNames = []
@@ -21,7 +21,7 @@ class CSV {
 					} else {
 						def fieldsMap = [:]
 						fieldNames.eachWithIndex { key, index ->
-							fieldsMap[key] = fields[index]
+							fieldsMap[key] = "\"${fields[index]}\""
 						}
 						csvData << fieldsMap
 					}
@@ -31,11 +31,13 @@ class CSV {
 		csvData
 	}
 
-	static def getCSVSize(csvFile) {
-		getCSVData(csvFile).size()
+	static def getSize(csvFile) {
+		getData(csvFile).size()
 	}
 		
-	static def getCSVHeader(cvsData) {
-		cvsData.keySet()
+	static def getHeader(csvFile) {
+		def header
+		csvFile.withReader { header = it.readLine() }  
+		header.split(",")
 	}
 }

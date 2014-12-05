@@ -29,6 +29,13 @@ class Blob {
 		blobstore.fetchData(file.blobKey, 0, getSize(file)	- 1) 
 	}
 
+	def getContentByKey(fileKey) {
+		def f = getFile(fileKey)
+		def bytes = blobstore.fetchData(f, 0, f.size - 1) 
+		def data = new String(bytes)
+		return Eval.me(data)
+	}
+	
 	def getSize(file) {
   		file.blobKey.info.size
 	}

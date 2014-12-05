@@ -7,19 +7,18 @@ import groovyx.gaelyk.GaelykBindings
 @GaelykBindings
 public class Certificado {
 
-	static def enviarCertificados(csvKey, pdfKey, message, subject, fromName, replyTo, userEmail, userName, teste = false) {
+	static def enviarCertificados(dataKey, pdfKey, message, subject, fromName, replyTo, userEmail, userName, teste = false) {
 		def blob = new Blob()
 
 		def flush = "" // MENSAGENS DE SUCESSO ENTRAM AQUI
 		def flushError = "" // MENSAGENS DE ERRO ENTRAM AQUI
 		def statusError = "" //ERROS GENERICO ENTRAM AQUI
 
-		def csvFile = blob.getFile(csvKey)
-		def csvData = CSV.getCSVData(csvFile)
+		def dataArray = blob.getContentByKey(dataKey)
 
 		def sucesso = 0
 		def erro = 0
-		for (data in csvData) {
+		for (data in dataArray) {
 			def pdfFile = blob.getFile(pdfKey)		
 			def outputPdfName = "${data['email']}_${pdfFile.filename}"
 			def pdfStamper = PDF.gerarPDF(pdfFile, data, outputPdfName)
@@ -38,9 +37,6 @@ public class Certificado {
 						subject, message, replyTo)
 					}
 
-					// armazena o CSV no blob
-					blob.createFile("text/csv", csvFile.filename, csvData)
-
 					new Logs().add(
 						fromName, 
 						data['email'],
@@ -49,7 +45,7 @@ public class Certificado {
 						message,
 			            vars as String,
 						pdfKey,
-						csvKey,
+						dataKey,
 						pdfStamper.blobKey.keyString,
 						outputPdfName,
 						userEmail,							

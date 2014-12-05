@@ -154,13 +154,19 @@
 							<option value="{{l.id}}" ng-repeat="l in mailchimpLists.list">{{l.name}} ({{l.size}})</option>
 						</select>
 					</div>
-				</div> 				          
+				</div> 			
+				
+				<div>	      
+					<br><br>
+					<p>A sua lista de pessoas deve usar os seguintes campos encontrados no Template PDF: $request.pdfFields</p>
+					<p>Foram encontrados os seguintes campos no CSV: $request.csvHeader</p>
+				</div>
 				<%
 				} else if (request.status == 'GETMSGDATA') {
 				%>
 				$request.listaMC
           		<input type="hidden" id="status" name="status" value="SENDPDF"/>  
-				<input name="csvKey" type="hidden" value="$request.csvKey"/>          
+				<input name="dataKey" type="hidden" value="$request.dataKey"/>          
 				<div class="form-group input-lg">
 					<label for="fromEmail" class="col-lg-2 control-label">Email do rementente</label>
 					<div class="col-lg-10">
@@ -217,9 +223,12 @@ $params.message
 						<%} else {%>                 
 						* O template PDF não possui nenhum campo que possa ser utilizado.
 						<%}%>
+						<%if (request.csvHeader != "null" && request.csvHeader != null) {%> 
+						<p>** Foram encontrados os seguintes campos no arquivo CSV: $request.csvHeader</p>
+						<%}%>
 					</div>
 				</div>    
-
+				
 				<br/> 
 				<div class="form-actions">
 				<%
