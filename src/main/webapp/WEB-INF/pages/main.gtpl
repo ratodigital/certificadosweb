@@ -139,7 +139,7 @@
 					<div class="col-lg-2"></div>
 					<div class="col-lg-6">
 						<div class="input-group">
-							<input type="text" class="form-control" size="10" name="apiKey" id="apiKey" placeholder="Mailcimp ApiKey" ng-model="apikey" ng-required="radioData == 'MC'"/>
+							<input type="text" class="form-control" size="10" name="apiKey" id="apiKey" ng-model="apikey" ng-required="radioData == 'MC'" <% if(session['lastMailchimpApiKey'] != null) {%> ng-init="apikey='${session['lastMailchimpApiKey']}'" value="${session['lastMailchimpApiKey']}"<%} else {%>placeholder="Mailchimp ApiKey ${session['lastMailchimpApiKey']}"<%}%> />
 							<span class="input-group-btn">
 								<a class="btn btn-primary" ng-click="listasMailchimp()">Obter Listas</span></a><span ng-model="wait" ng-show="wait">Aguarde...</span>
 							</span>

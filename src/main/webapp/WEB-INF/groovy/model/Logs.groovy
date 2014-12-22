@@ -12,7 +12,7 @@ public class Logs {
     def get(id) {
         def longId = Long.parseLong(id)
         Key key = KeyFactory.createKey("log", longId)
-        def goal = datastore.get(key)
+        datastore.get(key)
     }
 
     def listAll() {

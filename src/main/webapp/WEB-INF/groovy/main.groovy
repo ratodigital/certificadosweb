@@ -40,6 +40,12 @@ switch (params.status) {
 		session['pdfName'] = pdfFile.filename
 		session['pdfFields'] = getTemplateFieldsAsString(pdfFile)
 
+		def userPref = new UserPreferences().getByEmail(user.email)
+		if (userPref != null) {
+			session['lastMailchimpApiKey'] = userPref.mailchimpApiKey
+		} else {
+			session['lastMailchimpApiKey'] = null
+		} 
 		if (session['pdfFields'] == null) {
 			request.status = "GETPDF"
 			request.flushError = 'Selecione  um arquivo PDF válido.'
@@ -54,12 +60,13 @@ switch (params.status) {
 			def dataArray = new DataArray(dataArrayFile.filename, dataArrayFile)
 			session['dataArray'] = dataArray
 		} else {
-			def mc = new Mailchimp(params.apikey)
+			def mc = new Mailchimp(params.apiKey)
 			try {
 				def file = files.createNewBlobFile("text/plain", "hello.txt")
 				file.withWriter { writer ->
 					writer << mc.listExport(params.listID)
 				}
+				new UserPreferences().add(params.apiKey, params.listID, user.email)
 			} catch (Exception ex) {
 				ex.printStackTrace()
 			}		
