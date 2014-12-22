@@ -33,7 +33,8 @@ class Blob {
 		def f = getFile(fileKey)
 		def bytes = blobstore.fetchData(f, 0, f.size - 1) 
 		def data = new String(bytes)
-		return Eval.me(data)
+		println data
+		//return Eval.me(data)
 	}
 	
 	def getSize(file) {

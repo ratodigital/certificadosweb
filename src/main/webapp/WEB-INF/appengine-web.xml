@@ -34,4 +34,6 @@
         <exclude path="/WEB-INF/**.groovy" />
         <exclude path="**.gtpl" />
     </static-files>
+    
+    <sessions-enabled>true</sessions-enabled>
 </appengine-web-app>

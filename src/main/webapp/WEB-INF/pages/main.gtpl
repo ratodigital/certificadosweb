@@ -93,10 +93,6 @@
 				}
 				%>
 
-				<input name="pdfKey" type="hidden" value="$request.pdfKey"/>
-				<input name="pdfName" type="hidden" value="$request.pdfName"/>  
-				<input name="pdfFields" type="hidden" value="$request.pdfFields"/>    
-
 				<%
 				if (request.status == 'GETPDF') {
 				%>       
@@ -156,17 +152,12 @@
 					</div>
 				</div> 			
 				
-				<div>	      
-					<br><br>
-					<p>A sua lista de pessoas deve usar os seguintes campos encontrados no Template PDF: $request.pdfFields</p>
-					<p>Foram encontrados os seguintes campos no CSV: $request.csvHeader</p>
-				</div>
 				<%
 				} else if (request.status == 'GETMSGDATA') {
 				%>
 				$request.listaMC
           		<input type="hidden" id="status" name="status" value="SENDPDF"/>  
-				<input name="dataKey" type="hidden" value="$request.dataKey"/>          
+      
 				<div class="form-group input-lg">
 					<label for="fromEmail" class="col-lg-2 control-label">Email do rementente</label>
 					<div class="col-lg-10">
@@ -216,20 +207,21 @@ $params.message
             		</div>
           		</div>              
 
+				<br/> 
+
 				<div class="form-group">
 					<div class="col-lg-10 col-lg-offset-2">
-						<%if (request.pdfFields != "null" && request.pdfFields != null) {%> 
-						* É obrigatório usar <b>\$link</b>. Você também poderá usar <b>$request.pdfFields</b>
+						<%if (session['pdfFields'] != "null" && session['pdfFields'] != null) {%> 
+						* É obrigatório usar <b>\$link</b>. Você também poderá usar <b>${session['pdfFields']}</b>
 						<%} else {%>                 
 						* O template PDF não possui nenhum campo que possa ser utilizado.
 						<%}%>
-						<%if (request.csvHeader != "null" && request.csvHeader != null) {%> 
-						<p>** Foram encontrados os seguintes campos no arquivo CSV: $request.csvHeader</p>
+						<%if (session['dataHeader'] != "null" && session['dataHeader'] != null) {%> 
+						<p>** Foram encontrados os seguintes campos no arquivo CSV: ${session['dataHeader']}</p>
 						<%}%>
 					</div>
 				</div>    
 				
-				<br/> 
 				<div class="form-actions">
 				<%
 				} 
@@ -247,13 +239,16 @@ $params.message
 					submitButton = "Enviar certificados <span class=\"glyphicon glyphicon-ok\">"            
 				}
 				%>
+			
 				<div class="pull-right">
 					<button class="btn btn-primary btn-lg" onclick="submitForm();">$submitButton</span></button>
 				</div>
+
 			</div> <!-- end: form-actions -->
         </form>	                             
       </div> <!-- end: col-md-10 -->
     </div> <!-- end: row -->
+
 
 	<div class="container">
 		<% include '/WEB-INF/includes/divPdf.gtpl' %>	

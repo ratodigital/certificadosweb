@@ -23,7 +23,7 @@ public class Logs {
         }
     }
 
-    def add(name,email,replyTo,subject,message,vars,templateKey,dataKey,pdfKey,pdfName,userEmail,status) {
+    def add(name,email,replyTo,subject,message,vars,templateKey,/*dataKey,*/pdfKey,pdfName,userEmail,status) {
         datastore.withTransaction {
 			Entity e = new Entity("log")
 			e.name = name
@@ -33,7 +33,7 @@ public class Logs {
 			e.message = message
             e.vars = vars
 			e.templateKey = templateKey
-			e.dataKey = dataKey
+			/*e.dataKey = dataKey*/
 			e.pdfKey = pdfKey
 			e.pdfName = pdfName
 			e.status = status

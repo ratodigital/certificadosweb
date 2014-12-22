@@ -18,6 +18,8 @@ if (user == null) {
 	return
 } 
 
+def session = request.getSession()
+
 def blob = new Blob()
 
 if (!params.status) {
@@ -33,10 +35,12 @@ switch (params.status) {
 		//PDF
 		def blobs = blob.getUploadedBlobs(request)
 		def pdfFile = blobs["pdfFile"]
-		request.pdfKey = pdfFile.keyString
-		request.pdfName = pdfFile.filename    
-		request.pdfFields = getTemplateFieldsAsString(pdfFile)
-		if (request.pdfFields == null) {
+		
+		session['pdfKey'] = pdfFile.keyString
+		session['pdfName'] = pdfFile.filename
+		session['pdfFields'] = getTemplateFieldsAsString(pdfFile)
+
+		if (session['pdfFields'] == null) {
 			request.status = "GETPDF"
 			request.flushError = 'Selecione  um arquivo PDF válido.'
 		}
@@ -46,10 +50,9 @@ switch (params.status) {
 		//CSV
 		if (params.selListaMC == "" || params.selListaMC == null) {
 			def blobs = blob.getUploadedBlobs(request)
-			def csvFile = blobs["csvFile"]
-			def dataFile = blob.createFile("text/plain", csvFile.filename, CSV.getData(csvFile))
-			request.dataKey = dataFile.blobKey.keyString  
-			request.dataHeader = CSV.getHeader(dataFile)
+			def dataArrayFile = blobs["csvFile"]
+			def dataArray = new DataArray(dataArrayFile.filename, dataArrayFile)
+			session['dataArray'] = dataArray
 		} else {
 			def mc = new Mailchimp(params.apikey)
 			try {
@@ -61,18 +64,19 @@ switch (params.status) {
 				ex.printStackTrace()
 			}		
 		}
-		request.pdfKey = params.pdfKey
-		request.pdfName = params.pdfName
-		request.pdfFields = params.pdfFields
-   		request.listaMC = params.selListaMC
+   		session['listaMC'] = params.selListaMC
 		forward "/WEB-INF/pages/main.gtpl"
 		break
 	case "PREVIEW":     
-		def pdfFile = blob.getFile(params.pdfKey)
+		def pdfFile = blob.getFile(session['pdfKey'])
 		def previewData
-		if (params.dataKey) {
-			def dataArray = blob.getFile(params.dataKey)       
-			previewData = dataArray[0]
+		def dataArray = (DataArray)session['dataArray']
+		println "array"
+		println dataArray.getContent()
+		return
+		if (session['dataArray'] != null) {
+			//def dataArray = dataArray.getContent()[0]  //blob.getFile(params.dataKey)       
+			previewData = session['dataArray'].getContent()[0]
         } else if (params.selListaMC == "" || params.selListaMC == null) {
 			def mc = new Mailchimp(params.apikey)
 			def mcData = []
@@ -95,10 +99,12 @@ switch (params.status) {
 			flushError = 'Você obrigatoriamente deve usar o campo \$link.'
 		} else {      
 
-			def dataArray = blob.getContentByKey(params.dataKey)
+			//def dataArray = (DataArray) session['dataArray']
+			//def dataArray = dataArray.getContent() //blob.getContentByKey(params.dataKey)
+			
 			def returnMap = Certificado.enviarCertificados(
-				params.dataKey, 
-				params.pdfKey, 
+				((DataArray)session['dataArray']).getContent(), 
+				session['pdfKey'], 
 				params.message, 
 				params.subject, 
 				params.fromName, 
@@ -112,14 +118,14 @@ switch (params.status) {
 
 			if (request.flushError == "" && request.statusError == "") {
 
-				def csvSize = CSV.getSize(blob.getFile(params.dataKey))
+				//def dataArraySize = DataArray.getSize(blob.getFile(params.dataKey))
 
 				// Adiciona o envio na fila de processamento
 				defaultQueue << [
 					url: "/send",
 					method: 'PUT', 
-					params: [dataKey: params.dataKey, 
-							 pdfKey: params.pdfKey, 
+					params: [dataArray: dataArray, 
+							 pdfKey: session['pdfKey'], 
 							 message: params.message, 
 							 subject: params.subject, 
 							 fromName: params.fromName, 
@@ -128,7 +134,7 @@ switch (params.status) {
 							 userName: user.nickname]
 				]	
 			
-				request.flush = "$csvSize certificado(s) estão sendo gerados e preparados para envio.<br><br>" +
+				request.flush = "${dataArray.size()} certificado(s) estão sendo gerados e preparados para envio.<br><br>" +
 						 "Em pouco tempo você receberá um e-mail de <strong>certificadospdf@gmail.com</strong>," + 
 						 "<br>assim que o processamento for concluído."
 			
@@ -136,9 +142,6 @@ switch (params.status) {
 				forward "/WEB-INF/pages/main.gtpl"      
 			} else {
 				request.status = "GETMSGDATA"
-				request.pdfKey = params.pdfKey
-				request.pdfName = params.pdfName
-				request.pdfFields = params.pdfFields
 				request.replyTo = params.replyTo        
 				request.fromName = params.fromName
 				request.dataKey = params.dataKey

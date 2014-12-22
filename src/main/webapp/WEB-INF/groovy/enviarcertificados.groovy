@@ -1,7 +1,7 @@
 import util.*
 
 def returnMap = Certificado.enviarCertificados(
-	params.csvKey, 
+	params.dataKey, 
 	params.pdfKey, 
 	params.message, 
 	params.subject, 

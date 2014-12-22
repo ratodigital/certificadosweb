@@ -7,14 +7,14 @@ import groovyx.gaelyk.GaelykBindings
 @GaelykBindings
 public class Certificado {
 
-	static def enviarCertificados(dataKey, pdfKey, message, subject, fromName, replyTo, userEmail, userName, teste = false) {
+	static def enviarCertificados(dataArray, pdfKey, message, subject, fromName, replyTo, userEmail, userName, teste = false) {
 		def blob = new Blob()
 
 		def flush = "" // MENSAGENS DE SUCESSO ENTRAM AQUI
 		def flushError = "" // MENSAGENS DE ERRO ENTRAM AQUI
 		def statusError = "" //ERROS GENERICO ENTRAM AQUI
 
-		def dataArray = blob.getContentByKey(dataKey)
+		//def dataArray = blob.getContentByKey(dataKey)
 
 		def sucesso = 0
 		def erro = 0
@@ -37,6 +37,12 @@ public class Certificado {
 						subject, message, replyTo)
 					}
 
+					/* gravar lista de emails
+					def dataFile = blob.createFile("text/plain", csvFile.filename, csvData)
+					request.dataKey = dataFile.blobKey.keyString  
+					request.dataHeader = null //csvData.getHeader()
+					*/
+					
 					new Logs().add(
 						fromName, 
 						data['email'],
@@ -45,7 +51,7 @@ public class Certificado {
 						message,
 			            vars as String,
 						pdfKey,
-						dataKey,
+						/*dataKey,*/
 						pdfStamper.blobKey.keyString,
 						outputPdfName,
 						userEmail,							

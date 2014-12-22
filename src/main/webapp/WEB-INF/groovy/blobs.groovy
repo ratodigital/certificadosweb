@@ -2,6 +2,10 @@ import util.*
 
 import com.google.appengine.api.blobstore.BlobKey 
 
+def session = request.getSession()
+session['varname'] = new Date()
+println session['varname']
+/*
 def blob = new Blob()
 def a = blob.getContentByKey(params.key) as List
 println a
@@ -12,7 +16,7 @@ for (item in a) {
 	println item['email'] + "<br>"
 }
 
-/*
+
 def ar = Eval.me(a)
 println "<hr>"
 
@@ -35,11 +39,12 @@ def bytes = blobstore.fetchData(f, 0, f.size - 1)
 /*
 def dataArray = blob.getBytesByKey(params.dataKey)
 prinln dataArray
-*/
-/*
+
+
 blobstore.each { b ->
   println "$b.blobKey.keyString $b.filename $b.creation $b.contentType $b.size<br/>"
   def blob = b.blobKey 
   blob.delete()
 }
 */
+
